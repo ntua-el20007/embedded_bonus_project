@@ -1,0 +1,1 @@
+PID=$(sudo cat /sys/kernel/mm/damon/admin/kdamonds/0/pid); while true; do sudo ps -o pcpu,rss,cmd -p $PID 2>/dev/null; sleep 1; done
