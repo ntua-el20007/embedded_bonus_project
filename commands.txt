@@ -1,0 +1,9 @@
+sudo damo record --out thumbnailer2.data "python3.13 ./thumbnailer.py"
+
+[thank@thank thumbnailer]$ sudo damo report heats \
+> -i thumbnailer2.data \
+> --resol 32 32
+
+[thank@thank thumbnailer]$ sudo damo report heats -i thumbnailer2.data --resol 32 32 | sudo tee damo_clean_output.txt > /dev/null
+
+ scp thank@147.102.37.127:/home/thank/thumbnailer/damo_clean_output.txt ~/Documents/
