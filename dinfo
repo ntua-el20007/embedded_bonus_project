@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Check that exactly one argument is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <identifier>"
+  exit 1
+fi
+
+# Store the argument in a variable for clarity
+identifier="$1"
+
+# Execute the damo report commands with the argument appended to the file names
+sudo damo report heats --heatmap "access_pattern_heatmap_${identifier}.png"
+sudo damo report wss --range 0 101 1 --sortby time --plot "wss_chron_change_${identifier}.png"
