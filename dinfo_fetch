@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Check that exactly one argument is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <identifier>"
+  exit 1
+fi
+
+# Save the argument in a variable
+identifier="$1"
+
+# Define the destination directory and create it if it doesn't exist
+dest_dir=~/Documents/dinfo/"$identifier"
+mkdir -p "$dest_dir"
+
+# Define remote host and remote path (adjust if necessary)
+remote_user="thank"
+remote_host="147.102.37.127"
+remote_path="/home/thank/thumbnailer"
+
+# Use scp to copy and rename the access pattern heatmap image
+scp "${remote_user}@${remote_host}:${remote_path}/access_pattern_heatmap.png" \
+    "$dest_dir/access_pattern_heatmap_${identifier}.png"
+
+# Use scp to copy and rename the wss chronological change image
+scp "${remote_user}@${remote_host}:${remote_path}/wss_chron_change.png" \
+    "$dest_dir/wss_chron_change_${identifier}.png"
+
