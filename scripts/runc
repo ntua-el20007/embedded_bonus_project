@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Default number of runs
+DEFAULT_RUNS=10
+
+# Check if an argument is provided
+if [ $# -eq 0 ]; then
+    NUM_RUNS=$DEFAULT_RUNS
+else
+    NUM_RUNS=$1
+fi
+
+# Loop to run the client sequentially
+for ((i=1; i<=NUM_RUNS; i++))
+do
+    echo "Running client.py - Iteration $i"
+    ./client.py
+done
+
+echo "All iterations completed. Total runs: $NUM_RUNS"
+
