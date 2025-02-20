@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Check if an argument is provided
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <prefix>"
+    echo "Example: $0 test"
+    exit 1
+fi
+
+# Store the prefix argument (e.g., "test")
+prefix="$1"
+
+# Run damo report heatmap --guide and capture the output
+guide_output=$(sudo damo report heatmap --guide)
+
+# Check if guide output is empty or invalid
+if [ -z "$guide_output" ]; then
+    echo "Error: Failed to retrieve guide output. Ensure damon.data exists and is valid."
+    exit 1
+fi
+
+# Extract all regions and their address ranges
+regions=$(echo "$guide_output" | grep "region[[:space:]]*[0-9]\+:")
+
+# Check if any regions were found
+if [ -z "$regions" ]; then
+    echo "Error: No regions found in guide output."
+    exit 1
+fi
+
+# Generate WSS reports for all regions combined (not per-region)
+wss_text_file="${prefix}_wss.txt"
+wss_plot_file="${prefix}_wss.png"
+
+echo "Generating WSS text report for all regions: $wss_text_file"
+sudo bash -c "damo report wss > $wss_text_file"
+if [ -s "$wss_text_file" ]; then
+    echo "Success: $wss_text_file created."
+else
+    echo "Error: Failed to create $wss_text_file or it is empty."
+fi
+
+echo "Generating WSS plot for all regions: $wss_plot_file"
+sudo damo report wss --range 0 101 1 --sortby time --plot "$wss_plot_file"
+if [ -f "$wss_plot_file" ]; then
+    echo "Success: $wss_plot_file created."
+else
+    echo "Error: Failed to create $wss_plot_file."
+fi
+
+# Loop through each region for heatmaps only
+echo "$regions" | while IFS= read -r line; do
+    # Extract region number (e.g., 0, 1, 2)
+    region_num=$(echo "$line" | awk '{print $2}' | cut -d':' -f1)
+    
+    # Extract address range (e.g., 00000094119452057600-00000094119782047744)
+    address_range=$(echo "$line" | awk '{print $3}' | cut -d'(' -f1)
+    
+    # Split into start and end addresses
+    start_addr=$(echo "$address_range" | cut -d'-' -f1)
+    end_addr=$(echo "$address_range" | cut -d'-' -f2)
+    
+    # Define heatmap filename
+    heatmap_file="${prefix}_${region_num}.png"
+    
+    # Generate the heatmap for this region
+    echo "Generating heatmap for region $region_num: $heatmap_file"
+    sudo damo report heatmap --address_range "$start_addr" "$end_addr" --output "$heatmap_file"
+    
+    # Check if the heatmap file was created successfully
+    if [ -f "$heatmap_file" ]; then
+        echo "Success: $heatmap_file created."
+    else
+        echo "Error: Failed to create $heatmap_file."
+    fi
+done
+
+echo "Done generating heatmaps and WSS reports/plots for all regions."
